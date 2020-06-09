@@ -1,0 +1,200 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf400
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Monaco;}
+{\colortbl;\red255\green255\blue255;\red242\green242\blue242;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\csgray\c95825;\csgray\c0\c85000;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww14080\viewh11680\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\b\fs24 \cf0 \'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\'97 README\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+IMPORTANT PREREQUISITES: \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\b0 \cf0 1. Before running any script it is important to 
+\b backup all and any Excel files
+\b0 , so that the effect can be reverted\
+In case of any error! 
+\b \
+
+\b0 2. Create an empty offers file called <PREFIX>_offers.xlsx with empty round sheets for all rounds with title \'93Round_1\'94, \'93Round_2\'94\'85 etc.\
+3. Create an empty summary file called <PREFIX>_summary.xlsx with empty round sheets for all rounds. Pre-fill in first round details with number of seats etc.\
+4. Do not manually edit files because it sometimes leaves \'93blank cells\'94 at the bottom which then causes a bug in the code. If this happens, open the .xlsx file and manually delete rows under the rows which have content, till the bug doesn\'92t appear.
+\b \
+\
+\'97 make_offers.py\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f1\b0\fs20 \cf2 \cb3 \CocoaLigature0 Manus-MacBook-Air:Mtech_Admissions_Code manukaul$ python3 make_offers.py --help\
+usage: make_offers.py [-h] -a APPLICANTS_FILE -o OFFERS_PREFIX -r ROUND\
+\
+optional arguments:\
+  -h, --help            show this help message and exit\
+  -a APPLICANTS_FILE, --applicants_file APPLICANTS_FILE\
+                        The master file containing all the applications with\
+                        coap_id, gate_id, appl_id\
+  -o OFFERS_PREFIX, --offers_prefix OFFERS_PREFIX\
+                        This prefix will use <prefix>_offers.xlsx and\
+                        <prefix>_summary.xlsx files.\
+  -r ROUND, --round ROUND\
+                        Current round of offers to make
+\f0\b\fs24 \cf0 \cb1 \CocoaLigature1 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0 \
+Example Usage\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f1\b0\fs20 \cf2 \cb3 \CocoaLigature0 Manus-MacBook-Air:Mtech_Admissions_Code manukaul$ python3 make_offers.py --applicants_file "MTech TA 2yrs.xlsx" --offers_prefix "MTECH_TA" --round 1 \
+
+\f0\b\fs24 \cf0 \cb1 \CocoaLigature1 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\b0 \cf0 Here \'93MTech TA 2yrs.xlsx\'94 is the master file with the list of applications. Using the 
+\b \'97offers_prefix \'93METCH_TA\'94
+\b0  will look for two files: \
+1. 
+\f1\fs20 \cf2 \cb3 \CocoaLigature0 MTECH_TA_offers.xlsx
+\f0\b\fs24 \cf0 \cb1 \CocoaLigature1 \
+
+\b0 2. 
+\f1\fs20 \cf2 \cb3 \CocoaLigature0 MTECH_TA_summary.xlsx
+\f0\b\fs24 \cf0 \cb1 \CocoaLigature1 \
+
+\b0 The first one is the file with all the students that are offered seats by us in Round 1 and the second is the overall summary of how many seats remain to be offered for each category.
+\b \
+\
+\'97 update_offers.py\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f1\b0\fs20 \cf2 \cb3 \CocoaLigature0 Manus-MacBook-Air:Mtech_Admissions_Code manukaul$ python3 update_offers.py --help\
+usage: update_offers.py [-h] -a APPLICANTS_FILE -u UPDATE_FILE -c COAP_ID_COL\
+                        -op OFFERS_PREFIX -r ROUND\
+                        [-our OUR_STATUS_COL | -oth OTHER_STATUS_COL]\
+\
+optional arguments:\
+  -h, --help            show this help message and exit\
+  -a APPLICANTS_FILE, --applicants_file APPLICANTS_FILE\
+                        The master file containing all the applications with\
+                        coap_id, gate_id, appl_id\
+  -u UPDATE_FILE, --update_file UPDATE_FILE\
+                        The coap updates file containing all the application\
+                        status changes\
+  -c COAP_ID_COL, --coap_id_col COAP_ID_COL\
+                        The column name in updates spreadsheet where coap_id\
+                        is present. E.g. A means look in column A\
+  -op OFFERS_PREFIX, --offers_prefix OFFERS_PREFIX\
+                        This prefix will use <prefix>_offers.xlsx and\
+                        <prefix>_summary.xlsx files.\
+  -r ROUND, --round ROUND\
+                        Current round of offers to make\
+  -our OUR_STATUS_COL, --our_status_col OUR_STATUS_COL\
+                        The column in updates spreadsheet where iith_status is\
+                        present.\
+  -oth OTHER_STATUS_COL, --other_status_col OTHER_STATUS_COL\
+                        The column in updates spreadsheet where other_status\
+                        is present.
+\f0\b\fs24 \cf0 \cb1 \CocoaLigature1 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\b0 \cf0 \
+\
+\
+1. Accept and Freeze\
+2. Reject and Wait\
+3. Retain and Wait\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\b \cf0 \
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\b0 \cf0     status_map = \{\
+        ("our", "
+\b acceptandfreeze
+\b0 "): \{\
+            "status": "Accept",\
+            "reason": "IITH offered, accepted our offer",\
+        \},\
+        ("our", "
+\b rejectandwait
+\b0 "): \{\
+            "status": "Reject",\
+            "reason": "IITH offered, rejected our offer",\
+        \},\
+        ("our", "
+\b retainandwait
+\b0 "): \{\
+            "status": "Retain",\
+            "reason": "IITH offered, retained our offer",\
+        \},\
+        ("oth", "
+\b acceptandfreeze
+\b0 "): \{\
+            "status": "Reject",\
+            "reason": "IITH offered, accepted other offer",\
+        \},\
+    \}
+\b \
+\
+Example Usage\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f1\b0\fs20 \cf2 \cb3 \CocoaLigature0 python3 update_offers.py -a "CSE MTech TA 2yrs.xlsx" -u "round1_update1.xlsx" -c A -op "MTECH_TA" -r 1 -oth N\
+
+\f0\b\fs24 \cf0 \cb1 \CocoaLigature1 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\b0 \cf0 This will look at update file \'93round1_update1.xlsx\'94 find COAP_ID in column A, offer_files (summary and detail) are prefixed with MTECH_TA, round 1 updates, and other_Status of file found in col N is processed. 
+\b \
+\
+\
+Sample Rounds\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97-\
+# Round 1 (with no prior offers is tested)\
+
+\b0 python3 make_offers.py -a "CSE MTech TA 2yrs.xlsx" -o "MTECH_TA" -r 1\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\b \cf0 \
+# Round 1 update 1: with other offer taken, our reject\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\b0 \cf0 python3 update_offers.py -a "CSE MTech TA 2yrs.xlsx" -u "round1_update1.xlsx" -c A -op "MTECH_TA" -r 1 -oth N\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\b \cf0 # Round 1 update 2: with our offer retained, rejected\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\b0 \cf0 python3 update_offers.py -a "CSE MTech TA 2yrs.xlsx" -u "round1_update2.xlsx" -c A -op "MTECH_TA" -r 1 -our J
+\b \
+\
+# Round 2 (with prir offers made)\
+
+\b0 python3 make_offers.py -a "CSE MTech TA 2yrs.xlsx" -o "MTECH_TA" -r 2\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\b \cf0 # Round 3 (just without updates in round 2, you make offers)\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\b0 \cf0 python3 make_offers.py -a "CSE MTech TA 2yrs.xlsx" -o "MTECH_TA" -r 3\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\b \cf0 \
+\
+
+\f1\b0\fs20 \cf2 \cb3 \CocoaLigature0 'COAP20027079': \{'appl_id': 65084.0,\
+                  'btech_score': 73.9,\
+                  'category': 'gen',\
+                  'disabled_flg': 'No',\
+                  'gate_id': 'CS20S65015195',\
+                  'gate_score': 830.0,\
+                  'gender': 'Male',\
+                  'name': 'Mr Priyesh Jain',\
+                  'offer_seat_category': 'gen',\
+                  'status': 'Initial_Offer'\}\}\
+
+\f0\b\fs24 \cf0 \cb1 \CocoaLigature1 \
+}
