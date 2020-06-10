@@ -49,9 +49,9 @@ optional arguments:
 ```
 **Sample usage:**
 ```
-$ python3 make_offers.py --applicants_file "MTech TA 2yrs.xlsx" --offers_prefix "MTECH_TA" --round 1
+$ python3 make_offers.py --applicants_file "sample_app_file.xlsx" --offers_prefix "SAMPLE_TA" --round 1
 ```
-Here “MTech TA 2yrs.xlsx” is the master file with the list of applications. Using the —offers_prefix “METCH_TA” will look for two files: MTECH_TA_offers.xlsx and MTECH_TA_summary.xlsx. The first one is the file with all the students that are offered seats by us in Round 1 and the second is the overall summary of how many seats remain to be offered for each category.
+Here “sample_app_file.xlsx” is the master file with the list of applications. Using the —offers_prefix “SAMPLE_TA” will look for two files: SAMPLE_TA_offers.xlsx and SAMPLE_TA_summary.xlsx. The first one is the file with all the students that are offered seats by us in Round 1 and the second is the overall summary of how many seats remain to be offered for each category.
 
 ## Update Offers
 Run **update_offers.py** when making status updates on receiving COAP update files for latest round offers.
@@ -90,21 +90,21 @@ optional arguments:
 ```
 **Sample usage:**
 ```
-python3 update_offers.py -a "CSE MTech TA 2yrs.xlsx" -u "round1_update1.xlsx" -c A -op "MTECH_TA" -r 1 -oth N
+python3 update_offers.py -a "sample_app_file.xlsx" -u "round1_update1.xlsx" -c A -op "SAMPLE_TA" -r 1 -oth N
 ```
-This will look at update file “round1_update1.xlsx” find COAP_ID in column A, offer_files (summary and detail) are prefixed with MTECH_TA, round 1 updates, and other_Status of file found in col N is processed.
+This will look at update file “round1_update1.xlsx” find COAP_ID in column A, offer_files (summary and detail) are prefixed with SAMPLE_TA, round 1 updates, and other_Status of file found in col N is processed.
 
 ## Sample Rounds
 * Round 1 (with no prior offers is tested)
-    `python3 make_offers.py -a "CSE MTech TA 2yrs.xlsx" -o "MTECH_TA" -r 1`
+    `python3 make_offers.py -a "sample_app_file.xlsx" -o "SAMPLE_TA" -r 1`
 
 * Round 1 update 1: with other offer taken, our reject
-    `python3 update_offers.py -a "CSE MTech TA 2yrs.xlsx" -u "round1_update1.xlsx" -c A -op "MTECH_TA" -r 1 -oth N`
+    `python3 update_offers.py -a "sample_app_file.xlsx" -u "round1_update1.xlsx" -c A -op "SAMPLE_TA" -r 1 -oth N`
 * Round 1 update 2: with our offer retained, rejected
-    `python3 update_offers.py -a "CSE MTech TA 2yrs.xlsx" -u "round1_update2.xlsx" -c A -op "MTECH_TA" -r 1 -our J`
+    `python3 update_offers.py -a "sample_app_file.xlsx" -u "round1_update2.xlsx" -c A -op "SAMPLE_TA" -r 1 -our J`
 
 * Round 2 (with prir offers made)
-    `python3 make_offers.py -a "CSE MTech TA 2yrs.xlsx" -o "MTECH_TA" -r 2`
+    `python3 make_offers.py -a "sample_app_file.xlsx" -o "SAMPLE_TA" -r 2`
 
 ## Minor Bugs and Workarounds
 Do not manually edit files because it sometimes leaves “blank cells” at the bottom which then causes a bug in the code. If this happens, open the .xlsx file and manually delete rows under the rows which have content, till the bug doesn’t appear.
