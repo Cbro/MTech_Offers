@@ -78,6 +78,7 @@ class UpdateRow:
 
     coap_id: str
     status: str
+    program: str
 
 
 @dataclass
@@ -124,7 +125,8 @@ class Offer:
 
 def write_updated_summary(offers_summary_fname, rnd, rem_seats, factors):
     wb = openpyxl.load_workbook(filename=offers_summary_fname)
-    _name = "Round_" + str(rnd + 1)
+    #_name = "Round_" + str(rnd + 1)
+    _name = "Round_" + str(rnd)
     sh = wb[_name]
 
     # Column headings
@@ -172,7 +174,7 @@ def load_summary(offers_summary_fname, rnd, rem_seats, factors):
         factors[r.a] = r.c
 
 
-def load_updates(update_file, coap_id_col, status_col):
+def load_updates(update_file, coap_id_col, status_col, prog_col):
     """ load all update details from this file.
 
     Parameters
@@ -188,7 +190,7 @@ def load_updates(update_file, coap_id_col, status_col):
     # Load the rows from file for particular columns of interest
     # We are only interested in the coap_id and status column in
     # the update file.
-    cols_of_interest = [coap_id_col, status_col]
+    cols_of_interest = [coap_id_col, status_col, prog_col]
     print(
         f"Cols of interest in updates --> {cols_of_interest}, max rows = {worksheet.max_row}"
     )
@@ -196,7 +198,7 @@ def load_updates(update_file, coap_id_col, status_col):
         UpdateRow(*(worksheet[f"{column}{row}"].value for column in cols_of_interest))
         for row in range(2, worksheet.max_row + 1)
     ]
-    pprint(rows)
+    #pprint(rows)
 
     for r in rows:
         r.status = "".join(r.status.split()).lower()
@@ -355,7 +357,7 @@ def load_offers(offers_file, rnd):
 
 
 def process_updates(
-    updates, students_dict, offers_dict, status_map, our_other_flg, rem_seats
+    updates, students_dict, offers_dict, status_map, our_other_flg, rem_seats, program
 ):
     """ Process the list of updates here.
     Parameters
@@ -363,7 +365,13 @@ def process_updates(
     """
     # Iterate through all the updates
     for up in updates:
-        print(f"\n--- update coap_id = {up.coap_id}, status = {up.status}")
+        print(f"\n--- update coap_id = {up.coap_id}, status = {up.status}, program={up.program}")
+
+        # If the update program and student program don't match we can skip!
+        if up.program not in program:
+            print(f"-- Skipped because candidate program = {up.program}")
+            continue
+
         # Found coap_id in the list of applications in master file!
         if up.coap_id in students_dict:
             print(f"+++++++ Found {up.coap_id} in master applications list!")
@@ -385,6 +393,7 @@ def process_updates(
                     # the number of available seats in the
                     # seat_category.
                     if int_status in ["Accept", "Retain"]:
+                        print(f'\n------->>>>> [{up.coap_id}] For int_status = {int_status}, we reduce in {category} seats!\n')
                         rem_seats[category] -= 1
 
                 # Stamp the right status and reason on offer
@@ -419,7 +428,7 @@ def process_updates(
                     "appl_id": o.appl_id,
                     "name": o.name,
                     "gender": o.gender,
-                    "student_category": o.stdent_category,
+                    "student_category": o.student_category,
                     "disabled_flg": o.disabled_flg,
                     "gate_score": o.gate_score,
                     "btech_score": o.btech_score,
@@ -526,6 +535,20 @@ if __name__ == "__main__":
         help="This prefix will use <prefix>_offers.xlsx and <prefix>_summary.xlsx files.",
     )
     parser.add_argument(
+        "-prg",
+        "--program",
+        type=str,
+        required=True,
+        help="This is the program offered (e.g. CSE, NIS)",
+    )
+    parser.add_argument(
+        "-pcol",
+        "--program_col",
+        type=str,
+        required=True,
+        help="This is the column name in updates spreadsheet where program offered is present.",
+    )
+    parser.add_argument(
         "-r",
         "--round",
         type=int,
@@ -554,6 +577,8 @@ if __name__ == "__main__":
     coap_id_col = args.coap_id_col
     our_status_col = args.our_status_col
     other_status_col = args.other_status_col
+    program = args.program
+    prog_col = args.program_col
     rnd = args.round
 
     offers_detail_fname = offers_prefix + "_offers.xlsx"
@@ -586,7 +611,7 @@ if __name__ == "__main__":
 
     # Now let us load the updates!
     updates = []
-    updates_list = load_updates(update_file, coap_id_col, status_col)
+    updates_list = load_updates(update_file, coap_id_col, status_col, prog_col)
 
     #
     # Let us make a status map, from what is in the update file to
@@ -621,7 +646,7 @@ if __name__ == "__main__":
     updated_offers_dict = {}
 
     updated_offers_dict = process_updates(
-        updates_list, students_dict, offers_dict, status_map, our_other_flg, rem_seats
+        updates_list, students_dict, offers_dict, status_map, our_other_flg, rem_seats, program
     )
     # print(f'After processing updates: {updated_offers_dict}')
     pprint(updated_offers_dict)
