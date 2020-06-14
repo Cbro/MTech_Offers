@@ -19,7 +19,6 @@ import argparse
 # to skip headers.
 MASTER_FILE_ROW_START = 3
 
-
 @dataclass
 class ApplicantRow:
     """A class for holding applicant file row content"""
@@ -78,7 +77,7 @@ class UpdateRow:
 
     coap_id: str
     status: str
-    program: str
+    program: str = "NA" # NA is for consolidated file with no program
 
 
 @dataclass
@@ -363,13 +362,17 @@ def process_updates(
     Parameters
     ----------
     """
+
+    print(f'***** [process_updates] program = {program}')
+
     # Iterate through all the updates
     for up in updates:
         print(f"\n--- update coap_id = {up.coap_id}, status = {up.status}, program={up.program}")
 
         # If the update program and student program don't match we can skip!
-        if up.program not in program:
-            print(f"-- Skipped because candidate program = {up.program}")
+        # For consolidated file, the up.program will be None!
+        if (up.program is not None) and (up.program not in program): #and (program is not "NA"):
+            print(f"-- Skipped candidate because his/her program = {up.program}")
             continue
 
         # Found coap_id in the list of applications in master file!
@@ -538,14 +541,16 @@ if __name__ == "__main__":
         "-prg",
         "--program",
         type=str,
-        required=True,
+        default="NA",
+        required=False,
         help="This is the program offered (e.g. CSE, NIS)",
     )
     parser.add_argument(
         "-pcol",
         "--program_col",
         type=str,
-        required=True,
+        required=False,
+        default="Z",
         help="This is the column name in updates spreadsheet where program offered is present.",
     )
     parser.add_argument(
@@ -579,6 +584,9 @@ if __name__ == "__main__":
     other_status_col = args.other_status_col
     program = args.program
     prog_col = args.program_col
+
+    print(f'--- Input program, program_col = {program}, {prog_col}')
+
     rnd = args.round
 
     offers_detail_fname = offers_prefix + "_offers.xlsx"
