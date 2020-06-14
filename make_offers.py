@@ -33,6 +33,7 @@ class ApplicantRow:
     m: str
     n: str
 
+
 @dataclass
 class SummaryRow:
     """A class for holding summary file row content"""
@@ -65,7 +66,6 @@ class OfferRow:
     p: str
 
 
-
 @dataclass
 class Student:
     """A class for holding Student content"""
@@ -83,7 +83,7 @@ class Student:
     mobile: str
     gate_stream: str
     btech_stream: str
-    #status: str
+    # status: str
 
 
 @dataclass
@@ -236,7 +236,7 @@ def load_students(students_file):
     worksheet = wb[first_sheet]
 
     # Load the rows from file for particular columns of interest
-    #cols_of_interest = ["A", "B", "C", "D", "E", "G", "K", "BM", "BP", "EC"]
+    # cols_of_interest = ["A", "B", "C", "D", "E", "G", "K", "BM", "BP", "EC"]
     cols_of_interest = "ABCDEFGHIJKLMN"
     rows = [
         ApplicantRow(
@@ -290,7 +290,7 @@ def load_students(students_file):
             email=r.k,
             mobile=r.l,
             gate_stream=r.m,
-            btech_stream=r.n
+            btech_stream=r.n,
         )
         students.append(s)
         # print(asdict(s))
@@ -364,7 +364,9 @@ def process_applicants(
                 prev_seat_category = prev_offers_dict[s.coap_id]["offer_seat_category"]
                 prev_status = prev_offers_dict[s.coap_id]["status"]
                 prev_reason = prev_offers_dict[s.coap_id]["reason"]
-                offers = make_offer(s, prev_seat_category, rem_offers, prev_status, prev_reason)
+                offers = make_offer(
+                    s, prev_seat_category, rem_offers, prev_status, prev_reason
+                )
         # This student was never made an offer by us...
         else:
             # print(f"--- This coap_id was not offered a seat from IITH previously ...")
@@ -372,17 +374,17 @@ def process_applicants(
             # print(f"\n---- Processing student category = {s.category}")
             if rem_offers["gen"] > 0:
                 # print(f'[before gen offer]: rem_offers --> {rem_offers}')
-                offers = make_offer(s, "gen", rem_offers, "Initial_Offer","")
+                offers = make_offer(s, "gen", rem_offers, "Initial_Offer", "")
                 # print(f'[after gen offer]: rem_offers --> {rem_offers}')
 
             # all offers in seat = general category are exhausted.
-            elif rem_offers["gen"] == 0 and s.category != "gen":
+            elif rem_offers["gen"] <= 0 and s.category != "gen":
                 # Check in category other than general
                 if rem_offers[s.category] > 0:
                     # print(f'[before category offer]: rem_offers --> {rem_offers}')
-                    offers = make_offer(s, s.category, rem_offers, "Initial_Offer","")
+                    offers = make_offer(s, s.category, rem_offers, "Initial_Offer", "")
                     # print(f'[after category offer]: rem_offers --> {rem_offers}')
-                elif rem_offers[s.category] == 0:
+                elif rem_offers[s.category] <= 0:
                     continue
 
         # If all remaining seats in all categories are
@@ -475,6 +477,7 @@ def update_cutoffs_in_summary(offers, offers_summary_fname):
 
     wb.save(filename=offers_summary_fname)
 
+
 #################################################################################
 # Main Function
 #################################################################################
@@ -525,7 +528,8 @@ if __name__ == "__main__":
     pos_dict, neg_dict = {}, {}
     students = []
     students = load_students(students_file)
-    # pprint(students)
+
+    pprint(students)
 
     if rnd > 1:
         prev_offers_dict = load_all_previous_offers(
