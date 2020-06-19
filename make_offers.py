@@ -8,6 +8,7 @@ from dataclasses import dataclass, asdict
 from pprint import pprint
 from openpyxl.styles import Font
 import argparse
+import math
 
 # The row from which data starts in master file,
 # to skip headers.
@@ -40,7 +41,7 @@ class SummaryRow:
 
     a: str
     b: int
-    c: int
+    c: float
     d: float
 
 
@@ -321,7 +322,11 @@ def make_offer(s, seat_category, rem_offers, status, reason):
     # print(f"for (coap,gate,appl) = ({s.coap_id}, {s.gate_id}, {s.appl_id})")
     # print(offers[(s.coap_id, s.gate_id, s.appl_id)])
 
-    rem_offers[seat_category] -= 1
+    # For "Accept" status, we don't reduce the number of
+    # offers.
+    if status in ["Retain", "Initial_Offer"]:
+     rem_offers[seat_category] -= 1
+
     return offers
 
 
@@ -519,7 +524,8 @@ if __name__ == "__main__":
     load_summary(offers_summary_fname, rnd, rem_seats, factors)
     # Populate rem_offers now!
     for k, v in rem_seats.items():
-        rem_offers[k] = int(v) * int(factors[k])
+        #rem_offers[k] = int(v) * int(factors[k])
+        rem_offers[k] =  math.ceil( int(v) * float(factors[k]))
 
     pprint(rem_offers)
 

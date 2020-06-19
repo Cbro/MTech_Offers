@@ -14,6 +14,7 @@ from dataclasses import dataclass, asdict
 from pprint import pprint
 from openpyxl.styles import Font
 import argparse
+import math
 
 # The row from which data starts in master file,
 # to skip headers.
@@ -67,7 +68,7 @@ class SummaryRow:
 
     a: str
     b: int
-    c: int
+    c: float
     d: float
 
 
@@ -395,7 +396,7 @@ def process_updates(
                     # accepts or retains then we must reduce
                     # the number of available seats in the
                     # seat_category.
-                    if int_status in ["Accept", "Retain"]:
+                    if int_status in ["Accept"]: #, "Retain"]:
                         print(f'\n------->>>>> [{up.coap_id}] For int_status = {int_status}, we reduce in {category} seats!\n')
                         rem_seats[category] -= 1
 
@@ -598,7 +599,8 @@ if __name__ == "__main__":
     load_summary(offers_summary_fname, rnd, rem_seats, factors)
     # Populate rem_offers now!
     for k, v in rem_seats.items():
-        rem_offers[k] = int(v) * int(factors[k])
+        #rem_offers[k] = int(v) * int(factors[k])
+        rem_offers[k] =  math.ceil( int(v) * float(factors[k]))
 
     # pprint(rem_offers)
 
