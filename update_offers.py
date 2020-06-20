@@ -20,6 +20,7 @@ import math
 # to skip headers.
 MASTER_FILE_ROW_START = 3
 
+
 @dataclass
 class ApplicantRow:
     """A class for holding applicant file row content"""
@@ -78,7 +79,7 @@ class UpdateRow:
 
     coap_id: str
     status: str
-    program: str = "NA" # NA is for consolidated file with no program
+    program: str = "NA"  # NA is for consolidated file with no program
 
 
 @dataclass
@@ -98,7 +99,7 @@ class Student:
     mobile: str
     gate_stream: str
     btech_stream: str
-    #status: str
+    # status: str
 
 
 @dataclass
@@ -125,7 +126,7 @@ class Offer:
 
 def write_updated_summary(offers_summary_fname, rnd, rem_seats, factors):
     wb = openpyxl.load_workbook(filename=offers_summary_fname)
-    #_name = "Round_" + str(rnd + 1)
+    # _name = "Round_" + str(rnd + 1)
     _name = "Round_" + str(rnd)
     sh = wb[_name]
 
@@ -198,7 +199,7 @@ def load_updates(update_file, coap_id_col, status_col, prog_col):
         UpdateRow(*(worksheet[f"{column}{row}"].value for column in cols_of_interest))
         for row in range(2, worksheet.max_row + 1)
     ]
-    #pprint(rows)
+    # pprint(rows)
 
     for r in rows:
         r.status = "".join(r.status.split()).lower()
@@ -220,7 +221,7 @@ def load_students(students_file):
     worksheet = wb[first_sheet]
 
     # Load the rows from file for particular columns of interest
-    #cols_of_interest = ["A", "B", "C", "D", "E", "G", "K", "BM", "BP", "EC"]
+    # cols_of_interest = ["A", "B", "C", "D", "E", "G", "K", "BM", "BP", "EC"]
     cols_of_interest = "ABCDEFGHIJKLMN"
     rows = [
         ApplicantRow(
@@ -274,7 +275,7 @@ def load_students(students_file):
             email=r.k,
             mobile=r.l,
             gate_stream=r.m,
-            btech_stream=r.n
+            btech_stream=r.n,
         )
         students_dict[s.coap_id] = {
             "gate_score": s.gate_score,
@@ -334,7 +335,7 @@ def load_offers(offers_file, rnd):
             email=r.m,
             mobile=r.n,
             gate_stream=r.o,
-            btech_stream=r.p
+            btech_stream=r.p,
         )
         offers_dict[o.coap_id] = {
             "gate_id": o.gate_id,
@@ -351,8 +352,92 @@ def load_offers(offers_file, rnd):
             "email": o.email,
             "mobile": o.mobile,
             "gate_stream": o.gate_stream,
-            "btech_stream": o.btech_stream
+            "btech_stream": o.btech_stream,
         }
+    return offers_dict
+
+
+def load_all_previous_and_current_offers(offers_file, rnd):
+    """ load all student offers from each round
+
+    Parameters
+    ----------
+    offers_file : str
+        The name of file to load offer details from
+    rnd : int
+        The current round
+    returns a dict of offer objects
+    """
+    wb = openpyxl.load_workbook(filename=offers_file)
+
+    # Lets iterate through all worksheets to build our
+    # offers dictionary
+    offers_dict = {}
+    for i, worksheet in enumerate(wb.worksheets, start=1):
+        print(f"-- Processing previous worksheet number = {i}")
+        # Don't exceed into empty round sheets.
+        if i == (rnd + 1):
+            print(f"time to stop at {i}")
+            break
+
+        # Load the rows from file for particular columns of interest
+        cols_of_interest = "ABCDEFGHIJKLMNOP"
+        rows = [
+            OfferRow(
+                *(worksheet[f"{column}{row}"].value for column in cols_of_interest)
+            )
+            for row in range(2, worksheet.max_row + 1)
+        ]
+        # Iterate through the rows and build up the students
+        for r in rows:
+            # No need to load students who have been offered in
+            # previous round but are still at "Initial_Offer"
+            # status.
+            if r.c == "Initial_Offer":
+                continue
+
+            o = Offer(
+                coap_id=r.a,
+                status=r.b,
+                reason=r.c,
+                name=r.d,
+                gender=r.e,
+                student_category=r.f,
+                offer_seat_category=r.g,
+                appl_id=r.h,
+                gate_id=r.i,
+                disabled_flg=r.j,
+                gate_score=r.k,
+                btech_score=r.l,
+                email=r.m,
+                mobile=r.n,
+                gate_stream=r.o,
+                btech_stream=r.p,
+            )
+            offers_dict[o.coap_id] = {
+                "status": o.status,
+                "reason": o.reason,
+                "name": o.name,
+                "gender": o.gender,
+                "student_category": o.student_category,
+                "offer_seat_category": o.offer_seat_category,
+                "appl_id": o.appl_id,
+                "gate_id": o.gate_id,
+                "disabled_flg": o.disabled_flg,
+                "gate_score": o.gate_score,
+                "btech_score": o.btech_score,
+                "email": o.email,
+                "mobile": o.mobile,
+                "gate_stream": o.gate_stream,
+                "btech_stream": o.btech_stream,
+            }
+
+    #            # Let us just separate out the +ve and -ve COAPs
+    #            if o.status in ["Accept", "Retain"]:
+    #                pos_dict[o.coap_id] = 1
+    #            elif o.status == "Reject":
+    #                neg_dict[o.coap_id] = 1
+
     return offers_dict
 
 
@@ -364,16 +449,28 @@ def process_updates(
     ----------
     """
 
-    print(f'***** [process_updates] program = {program}')
+    print(f"***** [process_updates] program = {program}")
 
     # Iterate through all the updates
     for up in updates:
-        print(f"\n--- update coap_id = {up.coap_id}, status = {up.status}, program={up.program}")
+        print(
+            f"\n--- update coap_id = {up.coap_id}, status = {up.status}, program={up.program}"
+        )
 
         # If the update program and student program don't match we can skip!
         # For consolidated file, the up.program will be None!
-        if (up.program is not None) and (up.program not in program): #and (program is not "NA"):
+        if (up.program is not None) and (
+            up.program not in program
+        ):  # and (program is not "NA"):
             print(f"-- Skipped candidate because his/her program = {up.program}")
+            continue
+
+        # If last update file (consolidated), we shouldn't relook at
+        # previous offers
+        if up.program is None and up.coap_id in all_offers_dict:
+            print(
+                f"-- [consolidated] Skipped candidate because found in our prev offers."
+            )
             continue
 
         # Found coap_id in the list of applications in master file!
@@ -396,8 +493,10 @@ def process_updates(
                     # accepts or retains then we must reduce
                     # the number of available seats in the
                     # seat_category.
-                    if int_status in ["Accept"]: #, "Retain"]:
-                        print(f'\n------->>>>> [{up.coap_id}] For int_status = {int_status}, we reduce in {category} seats!\n')
+                    if int_status in ["Accept"]:  # , "Retain"]:
+                        print(
+                            f"\n------->>>>> [{up.coap_id}] For int_status = {int_status}, we reduce in {category} seats!\n"
+                        )
                         rem_seats[category] -= 1
 
                 # Stamp the right status and reason on offer
@@ -442,7 +541,7 @@ def process_updates(
                     "email": o.email,
                     "mobile": o.mobile,
                     "gate_stream": o.gate_stream,
-                    "btech_stream": o.btech_stream
+                    "btech_stream": o.btech_stream,
                 }
 
     return offers_dict
@@ -586,7 +685,7 @@ if __name__ == "__main__":
     program = args.program
     prog_col = args.program_col
 
-    print(f'--- Input program, program_col = {program}, {prog_col}')
+    print(f"--- Input program, program_col = {program}, {prog_col}")
 
     rnd = args.round
 
@@ -599,18 +698,23 @@ if __name__ == "__main__":
     load_summary(offers_summary_fname, rnd, rem_seats, factors)
     # Populate rem_offers now!
     for k, v in rem_seats.items():
-        #rem_offers[k] = int(v) * int(factors[k])
-        rem_offers[k] =  math.ceil( int(v) * float(factors[k]))
+        # rem_offers[k] = int(v) * int(factors[k])
+        rem_offers[k] = math.ceil(int(v) * float(factors[k]))
 
     # pprint(rem_offers)
 
     # This will have details of students we made offers to
     offers_dict = {}
+    all_offers_dict = {}
     students_dict = {}
     students_dict = load_students(students_file)
     # pprint(students_dict)
 
     offers_dict = load_offers(offers_detail_fname, rnd)
+    # This one had to be added for "consolidated file" processing.
+    # We want that offers in all previous rounds and current offers
+    # should be ignored.
+    all_offers_dict = load_all_previous_and_current_offers(offers_detail_fname, rnd)
     # pprint(offers_dict)
 
     status_col = ""
@@ -656,7 +760,13 @@ if __name__ == "__main__":
     updated_offers_dict = {}
 
     updated_offers_dict = process_updates(
-        updates_list, students_dict, offers_dict, status_map, our_other_flg, rem_seats, program
+        updates_list,
+        students_dict,
+        offers_dict,
+        status_map,
+        our_other_flg,
+        rem_seats,
+        program,
     )
     # print(f'After processing updates: {updated_offers_dict}')
     pprint(updated_offers_dict)
