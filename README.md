@@ -145,3 +145,13 @@ this file.
 
 ## Minor Bugs and Workarounds
 Do not manually edit files because it sometimes leaves “blank cells” at the bottom which then causes a bug in the code. If this happens, open the .xlsx file and manually delete rows under the rows which have content, till the bug doesn’t appear.
+
+## Common Pitfalls
+* At the very first make_offer run, not ensuring that you have summary and offers files with empty sheets per round, each
+named "Round_X", where X is the round number.
+
+* Not having checked the summary details before running make_offer for a new round. This file **MUST** contain the correct number of seats remaining and multipliers before the offers for the round can be made.
+
+* Not backing up files after running each update. In case of an error, a backup comes very handy.
+
+* Running update_offers on round_X but not setting flag "-r X" correctly. For example. it is possible to make the error of updating the round 2 offers with -r 1 (round 1) flag set. This will cause errors in your output files.
